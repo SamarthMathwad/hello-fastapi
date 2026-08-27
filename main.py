@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Depends
 from typing import Optional
 from pydantic import BaseModel, Field, field_validator
 
@@ -87,4 +87,32 @@ def get_products(
     return {
         "category": category,
         "limit": limit
+    }
+
+def get_user_details():
+    return {
+        "id": "1", 
+        "name": "Samarth",
+        "age": 20
+    }
+
+@app.get("/profile")
+def profile(user_details = Depends(get_user_details)):
+    return {
+        "message": "User Profile",
+        "details": user_details
+    }
+
+def require_adult(user_details = Depends(get_user_details)):
+    if user_details["age"]<18:
+        return {
+            "message": "You  must be an adult to access this resource."
+        }
+    return user_details
+
+@app.get("/adult-profile")
+def adult_profile(user_details = Depends(require_adult)):
+    return {
+        "message": "Adult Profile",
+        "details": user_details
     }
